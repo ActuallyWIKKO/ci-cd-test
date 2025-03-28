@@ -43,5 +43,5 @@ jobs:
       - name: Sync dev branch to main
         run: |
           git checkout main  # Switch to the main branch
-          git merge dev --no-ff -m "Sync dev to main after successful linting"  # Merge dev into main
+          git merge origin dev --no-ff -m "Sync dev to main after successful linting"  # Merge dev into main
           git push origin main  # Push the changes to the main branch
