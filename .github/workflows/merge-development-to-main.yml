@@ -1,0 +1,47 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - dev  # This triggers the action only when pushing to the dev branch
+
+jobs:
+  lint-html:
+    name: Lint HTML Files
+    runs-on: ubuntu-latest  # Using Ubuntu as the runner
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2  # Checkout the repository
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2  # Setup Node.js (required for HTML linting)
+        with:
+          node-version: '14'  # Specify Node.js version to use
+
+      - name: Install HTML linting tool
+        run: |
+          npm install -g htmlhint  # Install htmlhint globally
+
+      - name: Lint HTML files
+        run: |
+          htmlhint ./**/*.html  # Lint all .html files in the repository
+
+  sync-to-main:
+    name: Sync Dev to Main
+    runs-on: ubuntu-latest
+    needs: lint-html  # This job runs only if the linting was successful
+    if: success()  # Continue only if linting was successful
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Git user
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Sync dev branch to main
+        run: |
+          git checkout main  # Ensure you're on the 'main' branch (make sure it exists)
+          git merge dev --no-ff -m "Sync dev to main after successful linting"
+          git push origin main  # Push changes to the main branch
